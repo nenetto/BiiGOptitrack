@@ -36,7 +36,7 @@ set(${PROJECT_NAME}_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH
 option(${PROJECT_NAME}_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 option(${PROJECT_NAME}_CMAKE_DEBUG_FLAG "Create and install the HTML based API documentation (requires Doxygen)" ON)
 # Create option for fake API use
-option(${PROJECT_NAME}_USE_FAKE OFF)
+option(${PROJECT_NAME}_USE_FAKE_NPAPI OFF)
 
 
 # Create  library
@@ -89,7 +89,7 @@ endif()
 ###########################################
 # If the library is the FAKE version     ##
 ###########################################
-if(${PROJECT_NAME}_USE_FAKE)
+if(${PROJECT_NAME}_USE_FAKE_NPAPI)
 
     message("=======================================")
     message(" Using NPTrackingTools FAKE API        ")
@@ -186,15 +186,13 @@ if(${PROJECT_NAME}_USE_FAKE)
     # Configure Config.cmake ##
     ###########################
     # Include folders
-    set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/inc" "${PROJECT_BINARY_DIR}/CmakeFilesHeader")
-    # Include files
-    set(CONF_INCLUDE_FILES ${${PROJECT_NAME}_PUBLIC_HEADERS})
+    set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/inc;${PROJECT_BINARY_DIR}/CmakeFilesHeader")
     # Source folders
     set(CONF_SOURCE_DIRS ${PROJECT_SOURCE_DIR})
     # Library names
     set(CONF_LIBRARY ${PROJECT_NAME})
     # Library Folders
-    set(CONF_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/install/lib" "${PROJECT_BINARY_DIR}/install/bin")
+    set(CONF_LIBRARY_DIRS "${${PROJECT_NAME}_INSTALL_DIR}/lib" "${${PROJECT_NAME}_INSTALL_DIR}/bin")
     # Binary folder
     set(CONF_BINARY_DIR "${PROJECT_BINARY_DIR}")
     # Install folder
@@ -205,7 +203,6 @@ if(${PROJECT_NAME}_USE_FAKE)
     set(CONF_DEFINITIONS
         -DCMAKE_DEBUG_FLAG:BOOL=${${PROJECT_NAME}_CMAKE_DEBUG_FLAG})
     # Executables names
-    set(CONF_EXECUTABLES "")
     set(CONF_EXECUTABLES_DIRS "")
 
     if(${PROJECT_NAME}_CMAKE_DEBUG_FLAG)
@@ -246,15 +243,13 @@ if(${PROJECT_NAME}_USE_FAKE)
     # Configure Config.cmake for install folder ##
     ##############################################
     # Include folders
-    set(CONF_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/install/inc")
-    # Include files
-    file(GLOB CONF_INCLUDE_FILES ${CONF_INCLUDE_DIRS}/*.h)
+    set(CONF_INCLUDE_DIRS "${${PROJECT_NAME}_INSTALL_DIR}/inc")
     # Source folders
     set(CONF_SOURCE_DIRS "")
     # Library names
     set(CONF_LIBRARY ${PROJECT_NAME})
     # Library Folders
-    set(CONF_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/install/lib" "${PROJECT_BINARY_DIR}/install/bin")
+    set(CONF_LIBRARY_DIRS "${${PROJECT_NAME}_INSTALL_DIR}/lib" "${${PROJECT_NAME}_INSTALL_DIR}/bin")
     # Binary folder
     set(CONF_BINARY_DIR "${PROJECT_BINARY_DIR}")
     # Install folder
@@ -265,8 +260,7 @@ if(${PROJECT_NAME}_USE_FAKE)
     set(CONF_DEFINITIONS
         -DCMAKE_DEBUG_FLAG:BOOL=${${PROJECT_NAME}_CMAKE_DEBUG_FLAG})
     # Executables names
-    set(CONF_EXECUTABLES "")
-    set(CONF_EXECUTABLES_DIRS "${PROJECT_BINARY_DIR}/install/bin")
+    set(CONF_EXECUTABLES_DIRS "")
 
     if(${PROJECT_NAME}_CMAKE_DEBUG_FLAG)
         message("    Creating Config File ${PROJECT_NAME}Config.cmake into ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
@@ -352,8 +346,6 @@ else()
                           -P ${PROJECT_SOURCE_DIR}/CMake/ConfigureTrackingToolsAPI.cmake
                           )
 
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-
         # Add Export header to the HDR files
         # Join all headers together and make them public.
         set(${PROJECT_NAME}_PUBLIC_HEADERS ${${PROJECT_NAME}_HDR_FILES})
@@ -366,27 +358,23 @@ else()
         ##############################################
         # Include folders
         set(CONF_INCLUDE_DIRS ${TrackingToolsAPI_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}/CmakeFilesHeader")
-        # Include files
-        file(GLOB CONF_INCLUDE_FILES ${CONF_INCLUDE_DIRS}/*.h)
-        message("######### CONF_INCLUDE_DIRS: " ${CONF_INCLUDE_DIRS})
         # Source folders
         set(CONF_SOURCE_DIRS ${TrackingToolsAPI_SOURCE_DIRS})
         # Library names
-        set(CONF_LIBRARY ${PROJECT_NAME})
+        set(CONF_LIBRARY ${TrackingToolsAPI_LIB})
         # Library Folders
-        set(CONF_LIBRARY_DIRS ${TrackingToolsAPI_LIBRARIES})
+        set(CONF_LIBRARY_DIRS ${TrackingToolsAPI_LIB_DIR})
         # Binary folder
-        set(CONF_BINARY_DIR ${TrackingToolsAPI_BINARY_DIRS})
+        set(CONF_BINARY_DIR ${PROJECT_BINARY_DIR})
         # Install folder
         set(CONF_INSTALL_DIR "${${PROJECT_NAME}_INSTALL_DIR}")
         # Flag for libraries
-        set(CONF_SHARED ${TrackingToolsAPI_SHARED})
+        set(CONF_SHARED TRUE)
         # Definition of the project (options)
         set(CONF_DEFINITIONS
             -DCMAKE_DEBUG_FLAG:BOOL=${${PROJECT_NAME}_CMAKE_DEBUG_FLAG})
         # Executables names
-        set(CONF_EXECUTABLES ${TrackingToolsAPI_EXECUTABLES})
-        set(CONF_EXECUTABLES_DIRS "${TrackingToolsAPI_INSTALL_DIR}")
+        set(CONF_EXECUTABLES_DIRS ${TrackingToolsAPI_INSTALL_DIR})
 
         if(${PROJECT_NAME}_CMAKE_DEBUG_FLAG)
             message("    Creating Config File ${PROJECT_NAME}Config.cmake into ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
@@ -409,32 +397,37 @@ else()
 
         install(FILES "${TrackingToolsAPI_LIB_DIR}/${TrackingToolsAPI_LIBRARIES}.lib" DESTINATION lib)
         install(FILES "${TrackingToolsAPI_LIB_DIR}/${TrackingToolsAPI_LIBRARIES}.dll" DESTINATION bin)
-        file(GLOB ${PROJECT_NAME}_CMAKE_HDR_FILES ${PROJECT_BINARY_DIR}/CmakeFilesHeader/*.h)
-        install(FILES ${CONF_INCLUDE_FILES} DESTINATION inc)
+
+        set(INCLUDE_FILES )
+        foreach(INCLUDE_DIR ${TrackingToolsAPI_INCLUDE_DIRS})
+            # Include files
+            file(GLOB CONF_INCLUDE_FILES_AUX ${INCLUDE_DIR}/*.h)
+            set(INCLUDE_FILES ${INCLUDE_FILES} ${CONF_INCLUDE_FILES_AUX})
+        endforeach()
+
+        install(FILES ${INCLUDE_FILES} DESTINATION inc)
 
 
         #################################################################
         # Config File that will be used if the package is not installed #
         #################################################################
 
-        export(TARGETS ${PROJECT_NAME} FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
-        export(PACKAGE ${PROJECT_NAME})
+        configure_file("${PROJECT_SOURCE_DIR}/CMake/NPTrackingToolsTargets.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" @ONLY)
 
         ##############################################
         # Configure Config.cmake for install folder ##
         ##############################################
+
         # Include folders
-        set(CONF_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/install/inc")
-        # Include files
-        file(GLOB CONF_INCLUDE_FILES ${CONF_INCLUDE_DIRS}/*.h)
+        set(CONF_INCLUDE_DIRS "${${PROJECT_NAME}_INSTALL_DIR}/inc")
         # Source folders
         set(CONF_SOURCE_DIRS "")
         # Library names
-        set(CONF_LIBRARY ${PROJECT_NAME})
+        set(CONF_LIBRARY ${TrackingToolsAPI_LIB})
         # Library Folders
-        set(CONF_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/install/lib" "${PROJECT_BINARY_DIR}/install/bin")
+        set(CONF_LIBRARY_DIRS "${${PROJECT_NAME}_INSTALL_DIR}/lib" "${${PROJECT_NAME}_INSTALL_DIR}/bin")
         # Binary folder
-        set(CONF_BINARY_DIR "${PROJECT_BINARY_DIR}")
+        set(CONF_BINARY_DIR ${${PROJECT_NAME}_INSTALL_DIR}/bin)
         # Install folder
         set(CONF_INSTALL_DIR "${${PROJECT_NAME}_INSTALL_DIR}")
         # Flag for libraries
@@ -444,11 +437,13 @@ else()
             -DCMAKE_DEBUG_FLAG:BOOL=${${PROJECT_NAME}_CMAKE_DEBUG_FLAG})
         # Executables names
         set(CONF_EXECUTABLES "")
-        set(CONF_EXECUTABLES_DIRS "${PROJECT_BINARY_DIR}/install/bin")
+        set(CONF_EXECUTABLES_DIRS "${${PROJECT_NAME}_INSTALL_DIR}/bin")
 
         if(${PROJECT_NAME}_CMAKE_DEBUG_FLAG)
-            message("    Creating Config File ${PROJECT_NAME}Config.cmake into ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
+            message("    Creating Config File ${PROJECT_NAME}Config.cmake into ${${PROJECT_NAME}_INSTALL_DIR}/${PROJECT_NAME}Config.cmake")
         endif()
+
+
         # Create the file
         configure_file("${PROJECT_SOURCE_DIR}/CMake/Config.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigInstall.cmake" @ONLY)
         configure_file("${PROJECT_SOURCE_DIR}/CMake/ConfigInstall.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigInstallScript.cmake" @ONLY)
@@ -461,8 +456,8 @@ else()
         # Documentation  ##
         ###################
         if(${PROJECT_NAME}_BUILD_DOCUMENTATION)
-            include("${PROJECT_SOURCE_DIR}/doc/ConfigureDocumentation.cmake")
-    endif()
+            message("Documentation can be found in web")
+        endif()
 
 
     else()

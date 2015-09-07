@@ -27,7 +27,7 @@ set(${PROJECT_NAME}_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH
 # Create an option of the project for documentation option set
 option(${PROJECT_NAME}_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 option(${PROJECT_NAME}_CMAKE_DEBUG_FLAG "Create and install the HTML based API documentation (requires Doxygen)" ON)
-option(${PROJECT_NAME}_USE_FAKE "Fake Library NPTrackingTools" ON)
+option(${PROJECT_NAME}_USE_FAKE_NPAPI "Fake Library NPTrackingTools" ON)
 set(${PROJECT_NAME}_ITK_EXTERNAL_DIR "NOTFOUND" CACHE PATH "ITK DIR")
 set(${PROJECT_NAME}_OpenIGTLink_EXTERNAL_DIR "NOTFOUND" CACHE PATH "OpenIGTLink DIR")
 set(${PROJECT_NAME}_tinyxml2_EXTERNAL_DIR "NOTFOUND" CACHE PATH "timyxml2 DIR")
@@ -73,14 +73,5 @@ foreach (KEY ${VARIABLES})
   endif()
 endforeach()
 file(APPEND ${PROJECT_BINARY_DIR}/CMake.h "\n#endif  // __CMake_h\n")
-
-
-# configure launcher
-cma_configure_launcher("${PROJECT_SOURCE_DIR}/CMake/Launcher.cmake")
-
-cma_launcher_target(Terminal
-  NAME run_Terminal)
-cma_launcher_shortcut(Terminal
-  NAME Terminal)
 
 

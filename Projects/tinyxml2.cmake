@@ -8,6 +8,22 @@ set(EP_URL "https://github.com/leethomason/tinyxml2.git")
 cma_end_definition()
 # -----------------------------------------------------------------------------
 
+
+
+set(EP_OPTION_NAME "USE_${EP_NAME}")
+set(EP_REQUIRED_PROJECTS Git)
+set(EP_URL "https://github.com/leethomason/tinyxml2.git")
+set(EP_OPTION_DESCRIPTION "${EP_NAME} Project")
+set(EP_OPTION_DEFAULT ON)
+
+cma_list(APPEND EP_REQUIRED_PROJECTS Doxygen IF ${PROJECT_NAME}_BUILD_DOCUMENTATION)
+
+cma_end_definition()
+# -----------------------------------------------------------------------------
+
+
+
+
 if(${PROJECT_NAME}_tinyxml2_EXTERNAL_DIR)
 
     ExternalProject_Add(${EP_NAME}
@@ -45,7 +61,7 @@ else()
     BINARY_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-build
     # install
     # install
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-install
+    INSTALL_DIR ${${PROJECT_NAME}_INSTALL_DIR}
     INSTALL_COMMAND
     # test
     )
@@ -53,5 +69,3 @@ else()
   set(${PROJECT_NAME}_${EP_NAME}_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-install CACHE INTERNAL "")
 
 endif()
-
-
