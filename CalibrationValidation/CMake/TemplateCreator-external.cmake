@@ -1,8 +1,7 @@
-# Author: Eugenio Marinetto
-# Date: 2012-10-28
-
 set(EP_OPTION_NAME "USE_${EP_NAME}")
-set(EP_REQUIRED_PROJECTS NPTrackingTools BiiGOptitrackControl)
+set(EP_REQUIRED_PROJECTS Git)
+set(EP_URL "git://github.com/username/${EP_NAME}.git")
+set(EP_GIT_TAG "master")
 set(EP_OPTION_DESCRIPTION "${EP_NAME} Project")
 set(EP_OPTION_DEFAULT ON)
 
@@ -20,10 +19,6 @@ set(EP_CMAKE_ARGS
   -D${EP_NAME}_INSTALL_DIR:BOOL=${${PROJECT_NAME}_INSTALL_DIR}
   -D${EP_NAME}_BUILD_DOCUMENTATION:BOOL=${${PROJECT_NAME}_BUILD_DOCUMENTATION}
   -D${EP_NAME}_CMAKE_DEBUG_FLAG:BOOL=${${PROJECT_NAME}_CMAKE_DEBUG_FLAG}
-  -DNPTrackingTools_DIR:PATH=${${PROJECT_NAME}_NPTrackingTools_DIR}
-  -DBiiGOptitrackControl_DIR:PATH=${${PROJECT_NAME}_BiiGOptitrackControl_DIR}
-  -Dtinyxml2_DIR:PATH=${${PROJECT_NAME}_tinyxml2_DIR}
-  -DITK_DIR:PATH=${${PROJECT_NAME}_ITK_DIR}
 
   )
 
@@ -36,11 +31,13 @@ endif()
 ExternalProject_Add(${EP_NAME}
   DEPENDS ${EP_REQUIRED_PROJECTS}
   # download
+  GIT_REPOSITORY ${EP_URL}
+  GIT_TAG ${EP_GIT_TAG}
   # patch
   # update
   UPDATE_COMMAND ""
   # configure
-  SOURCE_DIR ${PROJECT_SOURCE_DIR}/${EP_NAME}
+  SOURCE_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}
   CMAKE_ARGS ${EP_CMAKE_ARGS}
   # build
   BINARY_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-build
@@ -48,5 +45,4 @@ ExternalProject_Add(${EP_NAME}
   INSTALL_DIR ${${PROJECT_NAME}_INSTALL_DIR}
   # test
   )
-
 set(${PROJECT_NAME}_${EP_NAME}_DIR "${PROJECT_BINARY_DIR}/${EP_NAME}-build" CACHE INTERNAL "")

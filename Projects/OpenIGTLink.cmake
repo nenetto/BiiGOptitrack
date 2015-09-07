@@ -47,12 +47,12 @@ else()
     # build
     BINARY_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-build
     # install
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-install
+    INSTALL_DIR ${${PROJECT_NAME}_INSTALL_DIR}
     INSTALL_COMMAND
     # test
     )
 
-  set(${PROJECT_NAME}_${EP_NAME}_DIR "${PROJECT_BINARY_DIR}/${EP_NAME}-install" CACHE INTERNAL "")
+  set(${PROJECT_NAME}_${EP_NAME}_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-build CACHE INTERNAL "")
 
 
 endif()

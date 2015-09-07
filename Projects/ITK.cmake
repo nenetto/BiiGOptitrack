@@ -56,7 +56,7 @@ else()
     # build
     BINARY_DIR ${PROJECT_BINARY_DIR}/${EP_NAME}-b
     # install
-    INSTALL_DIR ${${PROJECT_NAME}_INSTALL_DIR}
+    INSTALL_COMMAND ""
     # test
     )
 
